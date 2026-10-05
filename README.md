@@ -1,7 +1,8 @@
 # **QAP Diagrams**
 Create Q-A-P ternary diagrams in MATLAB.
 
-<img title="Example QAP Diagram" alt="Example QAP diagram with the three corners of the chart labeled as quartz, plagioclase, and alkali feldspar respectively and three different marker types scattered throughout the diagram with a legend indicating that the different makers represent the QAP values for different sites." src="qap_thumbnail.png">
+<img title="Example QAP Diagram" alt="Example QAP diagram with the three corners of the chart labeled as quartz, plagioclase, and alkali feldspar respectively and three different marker types scattered throughout the diagram with a legend indicating that the different makers represent the QAP values for different sites." src="./assets/qap_thumbnail.png">
+
 
 ## 💡 About
 #### What is a Q-A-P diagram?
@@ -69,7 +70,7 @@ H = qap_diagram();
 </details>
 
 <details>
-<summary> <b>Example</b> </summary>
+<summary> <b>Example 1</b> </summary>
 
 Construct a Q-A-P diagram and then overlay a `ternplot` object showing a sample that is 52% plagioclase, 30% quartz, and 18% alkali feldspar:
 
@@ -81,6 +82,27 @@ figure(1)
 qap_diagram();
 ternplot(A,P,Q,'kd','MarkerFaceColor','r')
 ```
+![QAP diagram generated in MATLAB showing a red diamond in the granodiorite region of the ternary phase diagram.](./assets/example1.png)
+
+**NOTE:** For this to work properly, you must pass `A` first, then `P`, then `Q` when calling the `ternplot(A,P,Q)` function!
+
+</details>
+
+<details>
+<summary> <b>Example 2</b> </summary>
+
+Construct a Q-A-P diagram for a volcanic sample with red rock labels. Save the chart objects to a variable called H and then modify the color of the tick labels using a custom color.
+
+```
+A = 33;
+P = 12;
+Q = 55;
+figure(2)
+H = qap_diagram('IgneousClass','Volcanic','FontColor','r');
+ternplot(A,P,Q,'kd','MarkerFaceColor','y');
+[H.TickLabels.Color] = deal([0.02 0.60 0.95]);
+```
+![QAP diagram generated in MATLAB showing a yellow diamond in the rhyolite region of the ternary phase diagram. Rock types are labeled in red letters and the tick labels are colored in a custom blue.](./assets/example2.png)
 
 **NOTE:** For this to work properly, you must pass `A` first, then `P`, then `Q` when calling the `ternplot(A,P,Q)` function!
 
