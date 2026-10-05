@@ -2,7 +2,7 @@ function qap_objects = qap_diagram(varargin)
 %QAP diagram
 %
 %Description
-% Uses alchemyst/ternplot (Sandrock, 2026) to construct a ternary plot
+% Uses alchemyst/ternplot (Sandrock, 2015) to construct a ternary plot
 % and then adds the appropriate labels for a QAP diagram. That is, a
 % special ternary plot used by mineralogists to map the compositions of
 % quartz (Q), alkali feldspar (A), and plagioclase feldspar (P) in igneous
@@ -21,7 +21,9 @@ function qap_objects = qap_diagram(varargin)
 %
 %   NAME          DEFAULT
 %   ==============================================================
-%   FontColor     [0.65 0.65 0.65]
+%   IgneousClass  'Plutonic' (other option: 'Volcanic')
+%
+%   FontColor     [0.65 0.65 0.65] 
 %
 %   GridLines     'off'
 %
@@ -72,19 +74,24 @@ function qap_objects = qap_diagram(varargin)
 % Begin main function
 %
   % Input parsing
+  color_validation_function = @(x) (isnumeric(x) & isequal(size(x),[1 3])) |...        % RGB triplet
+                                   (ischar(x) & length(x)==7 & strcmpi(x(1),'#')) |... % Hex code
+                                   (ischar(x) & length(x)<=7);                         % Simple string ('r' or 'red' or 'm' or 'magenta' etc.)
   P = inputParser();
-  addParameter(P,'FontColor',    [0.65 0.65 0.65], @(x) (isnumeric(x) & isequal(size(x),[1 3])) | (ischar(x) & length(x)==7) & strcmp(x(1),'#'));
+  addParameter(P,'IgneousClass','Plutonic',        @(x) ischar(x) & (strcmpi(x,'Plutonic') | strcmpi(x,'Volcanic')));
+  addParameter(P,'FontColor',    [0.65 0.65 0.65], color_validation_function);
   addParameter(P,'GridLines',    'off',            @(x) ischar(x) & (strcmpi(x,'on') | strcmpi(x,'off')));
   addParameter(P,'LineStyle',    {'-','LineWidth',0.5,'Color',[0.25 0.25 0.25]}, ...
                                                    @(x) iscell(x) & isvector(x));
   addParameter(P,'VertexLabels', 'off',            @(x) ischar(x) & (strcmpi(x,'on') | strcmpi(x,'off')));
   parse(P,varargin{:});
+  RockClass = P.Results.IgneousClass;
   FontColor = P.Results.FontColor;
   GridLines = P.Results.GridLines;
   LineStyle = P.Results.LineStyle;
   VertLabel = P.Results.VertexLabels;
   
-  % Create axes
+  % Initialize ternary axes
   ternplot(1,1,1,'HandleVisibility','off');
 
   % Update figure size so that labels fall in the correct positions
@@ -105,42 +112,85 @@ function qap_objects = qap_diagram(varargin)
     vertexlabel('Plagioclase','Quartz',{'Alkali','Feldspar'})
   end
 
-  % Add granite QAP divider lines
-  hold on
-    % Add quartz lines
-    for q = [5 20 60 90]
-      drawLine(q,0, q,1, LineStyle);
-    end
-    % Add feldspar lines
-    for f = [0.10 0.35 0.65 0.90]
-      if f==0.65
-        drawLine(0,f, 20,f, LineStyle);
-      else
-        drawLine(0,f, 60,f, LineStyle);
+
+  if strcmpi(RockClass,'Plutonic')
+    % Add granite QAP divider lines
+    hold on
+      % Add quartz lines
+      for q = [5 20 60 90]
+        drawLine(q,0, q,1, LineStyle);
       end
-    end
+      % Add feldspar lines
+      for f = [0.10 0.35 0.65 0.90]
+        if f==0.65
+          drawLine(0,f, 20,f, LineStyle);
+        else
+          drawLine(0,f, 60,f, LineStyle);
+        end
+      end
+
+  elseif strcmpi(RockClass,'Volcanic')
+    % Add rhyolite QAP divider lines
+    hold on
+      % Add quartz lines
+      for q = [5 20 60]
+        if q==5
+          drawLine(q,0, q,0.1, LineStyle);
+        elseif q==20
+          drawLine(q,0.1, q,1, LineStyle);
+        else
+          drawLine(q,0, q,1, LineStyle);
+        end
+      end
+      % Add feldspar lines
+      for f = [0.10 0.35 0.65 0.90]
+        if f==0.90
+          drawLine(20,f, 60,f, LineStyle);
+        else
+          drawLine(0,f, 60,f, LineStyle);
+        end
+      end
+  end
 
   % Add rock type labels
-  rock_names = {'Q5',{'quartz-rich','granitoid'},'alkali feldspar granite',...
-    'granite','granodiorite','tonalite','Q2','quartz syenite','quartz monzonite',...
-    {'quartz','monzodiorite'},'Q4','Q1','syenite','monzonite','monzodiorite','Q3'};
-  positions = [0.494407158836688 0.817181818181819 0.0447427293064876 0.0463821892393321;...
-               0.469798657718121 0.655771799628942 0.0950782997762863 0.0760667903525046;...
-               0.344519015659955 0.277293135435994 0.1661073825503360 0.0463821892393321;...
-               0.442375776436328 0.385865862708720 0.0704697986577181 0.0463821892393321;...
-               0.580418344519016 0.376623376623377 0.0582841163310962 0.0575139146567717;...
-               0.640939597315436 0.449834879406309 0.0732662192393736 0.0463821892393321;...
-               0.277404921700224 0.177107606679036 0.0447427293064877 0.0463821892393321;...
-               0.323266219239374 0.178962894248609 0.1180089485458610 0.0463821892393321;...
-               0.447427293064877 0.180818181818182 0.1392617449664430 0.0463821892393321;...
-               0.595637583892617 0.162265306122449 0.1101789709172260 0.0826326530612244;...
-               0.708053691275168 0.182673469387755 0.0447427293064877 0.0463821892393321;...
-               0.253914988814317 0.102896103896104 0.0447427293064877 0.0463821892393321;...
-               0.334451901565996 0.104751391465677 0.0721476510067114 0.0463821892393321;...
-               0.469798657718121 0.104751391465677 0.0939597315436242 0.0463821892393321;...
-               0.609619686800895 0.104751391465678 0.1101789709172260 0.0463821892393321;...
-               0.736017897091722 0.102896103896104 0.0447427293064877 0.0463821892393321];
-  rotations = [0 0 64 0 0 -65 0 0 0 0 0 0 0 0 0 0];
+  if strcmpi(RockClass,'Plutonic')
+    rock_names = {'Q5',{'quartz-rich','granitoid'},'alkali feldspar granite',...
+      'granite','granodiorite','tonalite','Q2','quartz syenite','quartz monzonite',...
+      {'quartz','monzodiorite'},'Q4','Q1','syenite','monzonite','monzodiorite','Q3'};
+    positions = [0.494407158836688 0.817181818181819 0.0447427293064876 0.0463821892393321;...
+                 0.469798657718121 0.655771799628942 0.0950782997762863 0.0760667903525046;...
+                 0.344519015659955 0.277293135435994 0.1661073825503360 0.0463821892393321;...
+                 0.442375776436328 0.385865862708720 0.0704697986577181 0.0463821892393321;...
+                 0.580418344519016 0.376623376623377 0.0582841163310962 0.0575139146567717;...
+                 0.640939597315436 0.449834879406309 0.0732662192393736 0.0463821892393321;...
+                 0.277404921700224 0.177107606679036 0.0447427293064877 0.0463821892393321;...
+                 0.323266219239374 0.178962894248609 0.1180089485458610 0.0463821892393321;...
+                 0.447427293064877 0.180818181818182 0.1392617449664430 0.0463821892393321;...
+                 0.595637583892617 0.162265306122449 0.1101789709172260 0.0826326530612244;...
+                 0.708053691275168 0.182673469387755 0.0447427293064877 0.0463821892393321;...
+                 0.253914988814317 0.102896103896104 0.0447427293064877 0.0463821892393321;...
+                 0.334451901565996 0.104751391465677 0.0721476510067114 0.0463821892393321;...
+                 0.469798657718121 0.104751391465677 0.0939597315436242 0.0463821892393321;...
+                 0.609619686800895 0.104751391465678 0.1101789709172260 0.0463821892393321;...
+                 0.736017897091722 0.102896103896104 0.0447427293064877 0.0463821892393321];
+    rotations = [0 0 64 0 0 -65 0 0 0 0 0 0 0 0 0 0];
+
+  elseif strcmpi(RockClass,'Volcanic')
+    rock_names = {'alkali rhyolite','rhyolite','rhyodacide','dacite',...
+                  'quartz andesite','trachyte','latite','andesite','basalt'};
+    positions = [0.344018015659955 0.277293135435994 0.1661073825503360 0.0463821892393321;...
+                 0.388375776436328 0.385865862708720 0.0704697986577181 0.0463821892393321;...
+                 0.482375776436328 0.385865862708720 0.0704697986577181 0.0463821892393321;...
+                 0.577418344519016 0.376623376623377 0.0582841163310962 0.0575139146567717;...
+                 0.656539597315436 0.405834879406309 0.1632662192393736 0.0463821892393321;...
+                 0.293266219239374 0.158962894248609 0.1180089485458610 0.0463821892393321;...
+                 0.456266219239374 0.158962894248609 0.1180089485458610 0.0463821892393321;...
+                 0.593266219239374 0.158962894248609 0.1180089485458610 0.0463821892393321;...
+                 0.699266219239374 0.103962894248609 0.1180089485458610 0.0463821892393321];
+    rotations = [64 0 0 0 -64 0 0 0 0 0 0 0 0 0];
+  end
+  
+  % Print rock labels on the ternary diagram
   for i = 1:length(rock_names)
     addRockLabels(rock_names{i}, positions(i,:), rotations(i), FontColor)
   end
@@ -160,47 +210,86 @@ function qap_objects = qap_diagram(varargin)
     %Annotations
       ann_pane = findall(gcf,'Type','Annotation');
       ann_objects = ann_pane.Children;
-      Q3_text = ann_objects(1);
-      Monzodiorite_text = ann_objects(2);
-      Monzonite_text = ann_objects(3);
-      Syenite_text = ann_objects(4);
-      Q1_text = ann_objects(5);
-      Q4_text = ann_objects(6);
-      QuartzMonzodiorite_text = ann_objects(7);
-      QuartzMonzonite_text = ann_objects(8);
-      QuartzSyenite_text = ann_objects(9);
-      Q2_text = ann_objects(10);
-      Tonalite_text = ann_objects(11);
-      Granodiorite_text = ann_objects(12);
-      Granite_text = ann_objects(13);
-      AlkaliFeldsparGranite_text = ann_objects(14);
-      QuartzRichGranitoid_text = ann_objects(15);
-      Q5_text = ann_objects(16);
+      if strcmpi(RockClass,'Plutonic')
+        Q3_text = ann_objects(1);
+        Monzodiorite_text = ann_objects(2);
+        Monzonite_text = ann_objects(3);
+        Syenite_text = ann_objects(4);
+        Q1_text = ann_objects(5);
+        Q4_text = ann_objects(6);
+        QuartzMonzodiorite_text = ann_objects(7);
+        QuartzMonzonite_text = ann_objects(8);
+        QuartzSyenite_text = ann_objects(9);
+        Q2_text = ann_objects(10);
+        Tonalite_text = ann_objects(11);
+        Granodiorite_text = ann_objects(12);
+        Granite_text = ann_objects(13);
+        AlkaliFeldsparGranite_text = ann_objects(14);
+        QuartzRichGranitoid_text = ann_objects(15);
+        Q5_text = ann_objects(16);
+      end
+      if strcmpi(RockClass,'Volcanic')
+        Basalt_text = ann_objects(1);
+        Andesite_text = ann_objects(2);
+        Latite_text = ann_objects(3);
+        Trachyte_text = ann_objects(4);
+        QuartzAndesite_text = ann_objects(5);
+        Dacite_text = ann_objects(6);
+        Rhyodacite_text = ann_objects(7);
+        Rhyolite_text = ann_objects(8);
+        AlkaliRhyolite_text = ann_objects(9);
+      end
     %Dividing lines
       line_objects = findall(gcf,'Type','Line');
-      DividingLines = line_objects(1:8);
+      if strcmpi(RockClass,'Plutonic')
+        DividingLines = line_objects(1:8);
+      elseif strcmpi(RockClass,'Volcanic')
+        DividingLines = line_objects(1:7);
+      end
     %Store everything in a struct
+      % Axes labels
       qap_objects.AxesLabels.AlkaliFeldspar = A_text;
       qap_objects.AxesLabels.Plagioclase = P_text;
       qap_objects.AxesLabels.Quartz = Q_text;
+
+      % Dividing lines
       qap_objects.DividingLines = DividingLines;
+
+      % Grid lines
       qap_objects.GridLines = gridlines;
-      qap_objects.RockTypes.AlkaliFeldsparGranite = AlkaliFeldsparGranite_text;
-      qap_objects.RockTypes.Granite = Granite_text;
-      qap_objects.RockTypes.Granodiorite = Granodiorite_text;
-      qap_objects.RockTypes.Monzodiorite = Monzodiorite_text;
-      qap_objects.RockTypes.Monzonite = Monzonite_text;
-      qap_objects.RockTypes.Syenite = Syenite_text;
-      qap_objects.RockTypes.Tonalite = Tonalite_text;
-      qap_objects.RockTypes.QuartzMonzodiorite = QuartzMonzodiorite_text;
-      qap_objects.RockTypes.QuartzMonzonite = QuartzMonzonite_text;
-      qap_objects.RockTypes.QuartzRichGranitoid = QuartzRichGranitoid_text;
-      qap_objects.RockTypes.QuartzSyenite = QuartzSyenite_text;
-      qap_objects.RockTypes.Q1 = Q1_text;
-      qap_objects.RockTypes.Q2 = Q2_text;
-      qap_objects.RockTypes.Q3 = Q3_text;
-      qap_objects.RockTypes.Q4 = Q4_text;
-      qap_objects.RockTypes.Q5 = Q5_text;
+
+      % Rock types
+      if strcmpi(RockClass,'Plutonic')
+        qap_objects.RockTypes.AlkaliFeldsparGranite = AlkaliFeldsparGranite_text;
+        qap_objects.RockTypes.Granite = Granite_text;
+        qap_objects.RockTypes.Granodiorite = Granodiorite_text;
+        qap_objects.RockTypes.Monzodiorite = Monzodiorite_text;
+        qap_objects.RockTypes.Monzonite = Monzonite_text;
+        qap_objects.RockTypes.Syenite = Syenite_text;
+        qap_objects.RockTypes.Tonalite = Tonalite_text;
+        qap_objects.RockTypes.QuartzMonzodiorite = QuartzMonzodiorite_text;
+        qap_objects.RockTypes.QuartzMonzonite = QuartzMonzonite_text;
+        qap_objects.RockTypes.QuartzRichGranitoid = QuartzRichGranitoid_text;
+        qap_objects.RockTypes.QuartzSyenite = QuartzSyenite_text;
+        qap_objects.RockTypes.Q1 = Q1_text;
+        qap_objects.RockTypes.Q2 = Q2_text;
+        qap_objects.RockTypes.Q3 = Q3_text;
+        qap_objects.RockTypes.Q4 = Q4_text;
+        qap_objects.RockTypes.Q5 = Q5_text;
+      end
+      if strcmpi(RockClass,'Volcanic')
+        qap_objects.RockTypes.AlkaliRhyolite = AlkaliRhyolite_text;
+        qap_objects.RockTypes.Andesite = Andesite_text;
+        qap_objects.RockTypes.Basalt = Basalt_text;
+        qap_objects.RockTypes.Dacite = Dacite_text;
+        qap_objects.RockTypes.Latite = Latite_text;
+        qap_objects.RockTypes.QuartzAndesite = QuartzAndesite_text;
+        qap_objects.RockTypes.Rhyodacite = Rhyodacite_text;
+        qap_objects.RockTypes.Rhyolite = Rhyolite_text;
+        qap_objects.RockTypes.Trachyte = Trachyte_text;
+      end
+
+      % Tick labels
       qap_objects.TickLabels = tick_text;
 
   end %End nargout statements 
