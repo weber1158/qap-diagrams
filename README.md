@@ -41,7 +41,8 @@ All name-value arguments are optional.
 
 | Name      | Class | Value (Default)      |
 | ------------- | --- | ------------- |
-| `FontColor` | RGB Triplet or Hexidecimal | `[0.65 0.65 0.65]` |
+| `IgneousClass` | char | `'Plutonic'` (other option: `'Volcanic'`) |
+| `FontColor` | RGB Triplet or Hexadecimal | `[0.65 0.65 0.65]` |
 | `GridLines` | char | `'off'` |
 | `LineStyle` | cell vector | `{'-','LineWidth',0.5,'Color',[0.25 0.25 0.25]}` |
 | `VertexLabels` | char | `'off'` |
