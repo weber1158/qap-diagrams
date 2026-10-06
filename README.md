@@ -13,6 +13,13 @@ Create Q-A-P ternary diagrams in MATLAB.
 # 🪨 MATLAB STEM Showcase 2026
 The latest release of this repository contains a [MATLAB Live Script file](https://github.com/weber1158/qap-diagrams/blob/main/scripts/STEM_Showcase.mlx) as my submission to the 2026 MATLAB [STEM Showcase](https://www.mathworks.com/matlabcentral/contests/2026-matlab-stem-showcase.html). The Live Script is designed as an interactive tool that teaches and helps explain how geologists use ternary diagrams to identify igneous rocks. 
 
+If the paths aren't working properly when using the Live Script, try re-setting the current folder to the main directory for the `QAP Diagrams` repository (e.g., `C:\<path-to-folder>\QAP Diagrams\`) and then execute
+
+```
+>> edit STEM_Showcase
+```
+from the Command Window. This should open the Live Script and give it access to the necessary asset files. 
+
 ## 💡 About
 #### What is a Q-A-P diagram?
 A Q-A-P diagram is a ternary phase diagram where the three corners of the triangle correspond to 100% quartz (Q), 100% alkali feldspar (A), and 100% plagioclase feldspar (P), respectively. The interior of the Q-A-P diagram is divided into sections belonging to different igneous rock types, such as granites. Q-A-P diagrams are useful in geologic studies that concern these common mineral phases.
