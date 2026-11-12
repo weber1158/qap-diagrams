@@ -1,6 +1,10 @@
 function classification = qap_classification(Q,A,P)
-%Igneous rock classification based on quartz (Q), alkali feldspar (A), and
-%plagioclase feldspar (P) contents
+%Igneous rock classification
+%
+%DESCRIPTION
+% Classifies plutonic and volcanic igneous rocks based on the relative
+% abundance of quartz (Q), alkali feldspar (A), and plagioclase (P).
+% 
 %
 %SYNTAX
 % qap_classification(Q,A,P)
